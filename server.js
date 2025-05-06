@@ -1,19 +1,32 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const sequelize = require('./config/db');
-const UserRoutes = require('./routes/UserRoutes');
-
-const app = express();
-
-app.use(bodyParser.json());
+const express = require("express");
+const cors = require("cors");
+const sequelize = require("./config/db");
+const router = require("./routes/userRoutes");
+const apiPort = 3000;
+ 
+const app = express(); // Criando aplicação 
+ 
+app.use(express.json());
 app.use(cors());
-app.use(UserRoutes);
-
-sequelize.sync().then(() => {
-    console.log('Banco de dados sincronizado!');
-});
-
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 8080')
+ 
+sequelize.authenticate()
+    .then(() => {
+        console.log("Conexão estabelecida com MySQL");
+    })
+    .catch((err) => {
+        console.error("Erro ao se conectar ao MySQL", err);
+    });
+ 
+sequelize.sync({ force: true })
+    .then(() => {
+        console.log("Sincronização bem-sucedida com MySQL");
+    })
+    .catch((err) => {
+        console.error("Erro na sincronização com MySQL", err);
+    });
+ 
+app.use("/api", router); // Desejamos utilizar modelo de conversa JSON
+ 
+app.listen(apiPort, () => {
+    console.log(`API rodando com sucesso na porta ${apiPort}`);
 });
